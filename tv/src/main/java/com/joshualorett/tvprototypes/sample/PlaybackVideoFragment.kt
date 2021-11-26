@@ -39,11 +39,11 @@ class PlaybackVideoFragment : Fragment(R.layout.fragment_playback),
             addListener(this@PlaybackVideoFragment)
         }
         controls.eventListener = object: PlaybackControls.EventListener {
-            override fun skipForward() {
+            override fun seekForward() {
                 player.seekForward()
             }
 
-            override fun skipBack() {
+            override fun seekBackward() {
                 player.seekBack()
             }
 

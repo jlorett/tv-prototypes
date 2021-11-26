@@ -92,11 +92,11 @@ class PlaybackControls @JvmOverloads constructor(
                 }
                 when (keyCode) {
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
-                        eventListener?.skipBack()
+                        eventListener?.seekBackward()
                         true
                     }
                     KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                        eventListener?.skipForward()
+                        eventListener?.seekForward()
                         true
                     }
                     else -> false
@@ -260,7 +260,7 @@ class PlaybackControls @JvmOverloads constructor(
                     KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_HEADSETHOOK -> broadcastPlayPause()
                     KeyEvent.KEYCODE_MEDIA_PLAY -> broadcastPlay()
                     KeyEvent.KEYCODE_MEDIA_PAUSE -> broadcastPause()
-                    KeyEvent.KEYCODE_MEDIA_REWIND -> eventListener?.skipBack()
+                    KeyEvent.KEYCODE_MEDIA_REWIND -> eventListener?.seekBackward()
                     KeyEvent.KEYCODE_DPAD_DOWN -> {
                         if (isVisible && seekBar.hasFocus()) {
                             hide()
@@ -274,8 +274,8 @@ class PlaybackControls @JvmOverloads constructor(
             } else {
                 // Repeatable events when down is held
                 when (keyCode) {
-                    KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> eventListener?.skipForward()
-                    KeyEvent.KEYCODE_MEDIA_REWIND -> eventListener?.skipBack()
+                    KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> eventListener?.seekForward()
+                    KeyEvent.KEYCODE_MEDIA_REWIND -> eventListener?.seekBackward()
                     else -> return super.dispatchKeyEvent(event)
                 }
                 true
@@ -303,8 +303,8 @@ class PlaybackControls @JvmOverloads constructor(
     }
 
     interface EventListener {
-        fun skipForward()
-        fun skipBack()
+        fun seekForward()
+        fun seekBackward()
         fun playPause(): Boolean
         fun play(): Boolean
         fun pause(): Boolean
