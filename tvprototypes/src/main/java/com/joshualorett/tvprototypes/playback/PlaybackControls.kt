@@ -31,7 +31,6 @@ class PlaybackControls @JvmOverloads constructor(
     private val timeFormatter = Formatter(formatBuilder, locale)
     private val refreshRateMs = 50L
     private val refreshProgressAction = Runnable { refreshProgress() }
-    private val hideTimeoutMs = 3000L
     private val hideControlAction = Runnable { hide() }
     private var state: State = State.Loading
     private var duration: Long = -1L
@@ -41,6 +40,7 @@ class PlaybackControls @JvmOverloads constructor(
     // Attributes
     private val seekBarColor: Int
     private val thumbColor: Int
+    private val hideTimeoutMs: Long
     var autoHide: Boolean
 
     val seekBar: SeekBar = root.findViewById(R.id.seekbar)
@@ -54,6 +54,7 @@ class PlaybackControls @JvmOverloads constructor(
         seekBarColor =  attributes.getColor(R.styleable.PlaybackControls_seekBarColor, Color.WHITE)
         thumbColor =  attributes.getColor(R.styleable.PlaybackControls_thumbColor, Color.WHITE)
         autoHide = attributes.getBoolean(R.styleable.PlaybackControls_autoHide, true)
+        hideTimeoutMs = (attributes.getFloat(R.styleable.PlaybackControls_hideTimeoutSeconds,3f) * 1000).toLong()
         attributes.recycle()
         setup()
     }

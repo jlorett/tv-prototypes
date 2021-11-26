@@ -4,5 +4,6 @@
         <attr name="seekBarColor" format="color" />
         <attr name="thumbColor" format="color" />
         <attr name="autoHide" format="boolean" />
+        <attr name="hideTimeoutSeconds" format="float" />
     </declare-styleable>
 </resources>
