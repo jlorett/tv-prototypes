@@ -41,7 +41,7 @@ class PlaybackControls @JvmOverloads constructor(
     // Attributes
     private val seekBarColor: Int
     private val thumbColor: Int
-    private val autoHide: Boolean
+    var autoHide: Boolean
 
     val seekBar: SeekBar = root.findViewById(R.id.seekbar)
     val progress: TextView = root.findViewById(R.id.progress)
