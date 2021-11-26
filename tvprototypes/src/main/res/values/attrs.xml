@@ -3,5 +3,6 @@
     <declare-styleable name="PlaybackControls">
         <attr name="seekBarColor" format="color" />
         <attr name="thumbColor" format="color" />
+        <attr name="autoHide" format="boolean" />
     </declare-styleable>
 </resources>

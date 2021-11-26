@@ -41,6 +41,7 @@ class PlaybackControls @JvmOverloads constructor(
     // Attributes
     private val seekBarColor: Int
     private val thumbColor: Int
+    private val autoHide: Boolean
 
     val seekBar: SeekBar = root.findViewById(R.id.seekbar)
     val progress: TextView = root.findViewById(R.id.progress)
@@ -52,6 +53,7 @@ class PlaybackControls @JvmOverloads constructor(
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.PlaybackControls, 0, 0)
         seekBarColor =  attributes.getColor(R.styleable.PlaybackControls_seekBarColor, Color.WHITE)
         thumbColor =  attributes.getColor(R.styleable.PlaybackControls_thumbColor, Color.WHITE)
+        autoHide = attributes.getBoolean(R.styleable.PlaybackControls_autoHide, true)
         attributes.recycle()
         setup()
     }
@@ -180,10 +182,12 @@ class PlaybackControls @JvmOverloads constructor(
     }
 
     private fun scheduleHide() {
-        removeCallbacks(hideControlAction)
-        hideAtMs = SystemClock.uptimeMillis() + hideTimeoutMs
-        if (isAttachedToWindow) {
-            postDelayed(hideControlAction, hideTimeoutMs)
+        if (autoHide) {
+            removeCallbacks(hideControlAction)
+            hideAtMs = SystemClock.uptimeMillis() + hideTimeoutMs
+            if (isAttachedToWindow) {
+                postDelayed(hideControlAction, hideTimeoutMs)
+            }
         }
     }
 
