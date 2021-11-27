@@ -26,28 +26,26 @@ class PlaybackControls @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     locale: Locale = Locale.getDefault()
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
-    private val root = LayoutInflater.from(context).inflate(R.layout.playback_controls, this)
-    private val formatBuilder = StringBuilder()
-    private val timeFormatter = Formatter(formatBuilder, locale)
+    private val formatterDestination = StringBuilder()
+    private val timeFormatter = Formatter(formatterDestination, locale)
     private val refreshRateMs = 50L
     private val refreshProgressAction = Runnable { refreshProgress() }
     private val hideControlAction = Runnable { hide() }
+    private val root = LayoutInflater.from(context).inflate(R.layout.playback_controls, this)
+    private val seekBar: SeekBar = root.findViewById(R.id.seekbar)
+    private val progress: TextView = root.findViewById(R.id.progress)
+    private val playPauseIndicator: ImageView = root.findViewById(R.id.playPauseIndicator)
     private var state: State = State.Loading
-    private var duration: Long = -1L
     private var durationReciprocal: Double = 0.0
     private var hideAtMs = -1L
+    var eventListener: EventListener? = null
+    var progressListener: ProgressListener? = null
 
     // Attributes
     private val seekBarColor: Int
     private val thumbColor: Int
     private val hideTimeoutMs: Long
     var autoHide: Boolean
-
-    val seekBar: SeekBar = root.findViewById(R.id.seekbar)
-    val progress: TextView = root.findViewById(R.id.progress)
-    val playPauseIndicator: ImageView = root.findViewById(R.id.playPauseIndicator)
-    var eventListener: EventListener? = null
-    var progressListener: ProgressListener? = null
 
     init {
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.PlaybackControls, 0, 0)
@@ -107,7 +105,6 @@ class PlaybackControls @JvmOverloads constructor(
     }
 
     fun load(duration: Long) {
-        this.duration = duration
         durationReciprocal = seekBar.max/duration.toDouble()
         state = State.Ready
         refreshProgress()
@@ -137,7 +134,7 @@ class PlaybackControls @JvmOverloads constructor(
 
                     override fun onAnimationRepeat(animation: Animator?) {}
 
-                }).interpolator = FastOutLinearInInterpolator()
+                }).interpolator = LinearOutSlowInInterpolator()
         }
         scheduleHide()
     }
@@ -165,7 +162,7 @@ class PlaybackControls @JvmOverloads constructor(
 
                     override fun onAnimationRepeat(animation: Animator?) {}
 
-                }).interpolator = LinearOutSlowInInterpolator()
+                }).interpolator = FastOutLinearInInterpolator()
         }
         removeCallbacks(hideControlAction)
         hideAtMs = -1L
@@ -174,7 +171,7 @@ class PlaybackControls @JvmOverloads constructor(
     private fun refreshProgress() {
         if (state is State.Ready) {
             val progressMs = progressListener?.progress() ?: 0L
-            progress.text = progressMs.getStringForTime(formatBuilder, timeFormatter)
+            progress.text = progressMs.getStringForTime(formatterDestination, timeFormatter)
             seekBar.progress = getSeekBarProgress(progressMs)
             // Cancel any pending updates and schedule a new one if necessary.
             removeCallbacks(refreshProgressAction)
@@ -193,7 +190,7 @@ class PlaybackControls @JvmOverloads constructor(
     }
 
     /**
-     * Always should produce a number between [0, 100]
+     * Always should produce a number between seekBar's min and max [0, 100].
      */
     private fun getSeekBarProgress(progressMs: Long): Int {
         return seekBar.max - (progressMs * durationReciprocal).toInt()
@@ -229,6 +226,24 @@ class PlaybackControls @JvmOverloads constructor(
             .interpolator = FastOutLinearInInterpolator()
     }
 
+    private fun broadcastPlayPause() {
+        val isPlaying = eventListener?.playPause() == true
+        playPauseIndicator.isEnabled = !isPlaying
+        animatePlayPauseToggle()
+    }
+
+    private fun broadcastPlay() {
+        val isPlaying = eventListener?.play() == true
+        playPauseIndicator.isEnabled = isPlaying
+        animatePlayPauseToggle()
+    }
+
+    private fun broadcastPause() {
+        val isPaused = eventListener?.pause() == true
+        playPauseIndicator.isEnabled = isPaused
+        animatePlayPauseToggle()
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         if (hideAtMs != -1L) {
@@ -244,8 +259,8 @@ class PlaybackControls @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
         removeCallbacks(refreshProgressAction)
+        super.onDetachedFromWindow()
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -283,24 +298,6 @@ class PlaybackControls @JvmOverloads constructor(
             }
         }
         return super.dispatchKeyEvent(event)
-    }
-
-    private fun broadcastPlayPause() {
-        val isPlaying = eventListener?.playPause() == true
-        playPauseIndicator.isEnabled = !isPlaying
-        animatePlayPauseToggle()
-    }
-
-    private fun broadcastPlay() {
-        val isPlaying = eventListener?.play() == true
-        playPauseIndicator.isEnabled = isPlaying
-        animatePlayPauseToggle()
-    }
-
-    private fun broadcastPause() {
-        val isPaused = eventListener?.pause() == true
-        playPauseIndicator.isEnabled = isPaused
-        animatePlayPauseToggle()
     }
 
     interface EventListener {
